@@ -1,7 +1,28 @@
 import GitHubSignInButton from "@/components/GithubSignInBtn";
 import GoogleSignInButton from "@/components/GoogleSignInBtn";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
 
 const SignUp = () => {
+  const [name, setName] = useState(""); 
+  const [email, setEmail] = useState(""); 
+  const [password, setPassword] = useState(""); 
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); 
+
+    try {
+      const { data, error } = await authClient.signUp.email({
+          name: "John Doe", // required
+          email: "john.doe@example.com", // required
+          password: "password1234", // required
+          image: "https://example.com/image.png",
+          callbackURL: "https://example.com/callback",
+      });
+    } catch (e) {
+      console.error(e); 
+    }
+  }
   return (
     <div className="min-h-screen flex justify-center items-center">
       <div className="flex flex-col bg-white border-2 border-gray-200 rounded-2xl lg:min-w-lg p-8 shadow gap-y-4 mx-4">
@@ -16,12 +37,13 @@ const SignUp = () => {
           <form>
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Name:</label>
+                <label className="text-md text-black font-medium">Name:</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
                   placeholder="John Doe"
+                  onChange={(e) => setName(e.target.value)}
                   required
                   className="
                     rounded-lg border border-gray-300
@@ -34,12 +56,13 @@ const SignUp = () => {
               </div>
 
               <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Email:</label>
+                <label className="text-md text-black font-medium">Email:</label>
                 <input
                   type="email"
                   id="email"
                   name="email"
                   placeholder="john@example.com"
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="
                     rounded-lg border border-gray-300
@@ -52,11 +75,12 @@ const SignUp = () => {
               </div>
 
               <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Password:</label>
+                <label className="text-md text-black font-medium">Password:</label>
                 <input
                   type="password"
                   id="password"
                   name="password"
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Password"
                   className="

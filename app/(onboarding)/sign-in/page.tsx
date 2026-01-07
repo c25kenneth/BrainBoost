@@ -16,26 +16,8 @@ const SignIn = () => {
         <div>
           <form>
             <div className="flex flex-col gap-y-4">
-              {/* <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Username:</label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  placeholder="John Doe"
-                  required
-                  className="
-                    rounded-lg border border-gray-300
-                    px-3 py-2
-                    text-md
-                    focus:outline-none focus:ring-2 focus:ring-gray-600
-                  focus:border-gray-700
-                  "
-                />
-              </div> */}
-
               <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Email:</label>
+                <label className="text-md text-black font-medium">Email:</label>
                 <input
                   type="email"
                   id="email"
@@ -53,7 +35,7 @@ const SignIn = () => {
               </div>
 
               <div className="flex flex-col gap-y-1">
-                <label className="text-lg text-black font-medium">Password:</label>
+                <label className="text-md text-black font-medium">Password:</label>
                 <input
                   type="password"
                   id="password"
