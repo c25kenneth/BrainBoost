@@ -1,7 +1,9 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma";
-
+import { authClient } from "./auth-client";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
@@ -12,3 +14,15 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   }, 
 });
+
+export const getCurrentUser = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
+
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
+
+  return session.user;
+}

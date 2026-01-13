@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const OnboardingLayout = ({children}: {children: React.ReactNode}) => {
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-purple-50 to-purple-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 to-purple-100">
       <nav className="border-b border-gray-200">
         <div className="container mx-auto px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
@@ -16,7 +16,7 @@ const OnboardingLayout = ({children}: {children: React.ReactNode}) => {
         </div>
       </nav>
       
-      <main className="flex-1 overflow-hidden">{children}</main>
+      <main className="flex-1">{children}</main>
     </div>
   )
 }

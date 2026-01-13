@@ -1,9 +1,23 @@
+"use client";
+
 import GitHubSignInButton from "@/components/GithubSignInBtn";
 import GoogleSignInButton from "@/components/GoogleSignInBtn";
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 const SignUp = () => {
+
+  const router = useRouter();
+  const { data: session } = authClient.useSession()
+
+  useEffect(() => {
+      if (session?.user) {
+        router.push('/home');
+      }
+  }, [session, router])
+  
   const [name, setName] = useState(""); 
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState(""); 
@@ -13,19 +27,25 @@ const SignUp = () => {
 
     try {
       const { data, error } = await authClient.signUp.email({
-          name: "John Doe", // required
-          email: "john.doe@example.com", // required
-          password: "password1234", // required
-          image: "https://example.com/image.png",
-          callbackURL: "https://example.com/callback",
+          name: name,
+          email: email, 
+          password: password,
       });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      console.log(data);
+      router.push('/home');
     } catch (e) {
       console.error(e); 
     }
   }
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      <div className="flex flex-col bg-white border-2 border-gray-200 rounded-2xl lg:min-w-lg p-8 shadow gap-y-4 mx-4">
+    <div className="min-h-screen flex justify-center items-center py-8 px-4">
+      <div className="flex flex-col bg-white border-2 border-gray-200 rounded-2xl p-8 w-full max-w-md shadow gap-y-4">
         <div>
           <h2 className="text-2xl font-bold">Sign Up</h2>
           <p className="text-lg text-gray-600">
@@ -34,7 +54,7 @@ const SignUp = () => {
         </div>
 
         <div>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-1">
                 <label className="text-md text-black font-medium">Name:</label>
@@ -118,6 +138,8 @@ const SignUp = () => {
 
           <GoogleSignInButton />
           <GitHubSignInButton />
+
+          <p className="flex self-center text-md mt-3">Already have an account?<Link href="/sign-in" className="text-indigo-500 text-md font-semibold ml-1 hover:cursor-pointer">Sign In</Link></p>
       </div>
     </div>
   );

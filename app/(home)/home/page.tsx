@@ -2,9 +2,12 @@ import Image from "next/image";
 import NoData from "../../../public/NoData.svg";
 import StudySetCard from "@/components/StudySetCard";
 import { Settings } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
 
-const Dashboard = () => {
+const Dashboard = async () => {
   const hasExistingSets = true;
+
+  const currUser = await getCurrentUser();
 
   return (
     <div className="h-screen overflow-hidden">
@@ -27,7 +30,7 @@ const Dashboard = () => {
       {/* <Sidebar currentPath='/home'/> */}
       <main className="flex flex-col min-h-screen overflow-hidden gap-y-4 px-20">
         <div>
-          <h1 className="text-indigo-500 md:text-xl lg:text-3xl font-bold">Welcome, 👋</h1>
+          <h1 className="text-indigo-500 md:text-xl lg:text-3xl font-bold">Welcome, {currUser?.name}👋</h1>
           <p className="font-medium md:text-lg lg:text-xl text-gray-500">
             Let&apos;s Get You Ready to Learn
           </p>

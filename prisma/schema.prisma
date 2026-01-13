@@ -35,19 +35,20 @@ enum QuestionType {
 
 model User {
   id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  name      String
+  email     String
+  emailVerified Boolean  @default(false)
   image     String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   studySets     StudySet[]
   chatMessages  ChatMessage[]
   questions     PracticeQuestion[]
-  emailVerified Boolean            @default(false)
-  updatedAt     DateTime           @updatedAt
   sessions      Session[]
   accounts      Account[]
 
+  @@unique([email])
   @@map("user")
 }
 
