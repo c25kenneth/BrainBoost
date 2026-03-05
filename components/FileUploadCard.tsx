@@ -3,7 +3,7 @@
 
 import { Card, CardContent } from "./ui/card";
 import { Plus } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "./ui/button";
 
 const FileUploadCard = () => {
