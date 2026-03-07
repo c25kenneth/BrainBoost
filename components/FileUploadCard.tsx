@@ -66,6 +66,7 @@ const FileUploadCard = () => {
                 <CreateStudySetDialogue
                   open={dialogOpen}
                   onOpenChange={handleDialogOpenChange}
+                  selectedFile={currFile}
                 />
               </div>
             ) : (
