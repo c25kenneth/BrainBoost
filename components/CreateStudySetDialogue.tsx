@@ -36,9 +36,11 @@ const CreateStudySetDialogue = ({
   selectedFile,
 }: CreateStudySetDialogueProps) => {
   const [formData, setFormData] = useState(INITIAL_STUDYSET_DIALOG);
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
 
     if (
       !selectedFile ||
@@ -72,6 +74,7 @@ const CreateStudySetDialogue = ({
       console.error(err);
     } finally {
       // set the loading functionality here.
+      setLoading(false);
     }
 
     onOpenChange(false);
@@ -91,7 +94,18 @@ const CreateStudySetDialogue = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent
+        onInteractOutside={(e) => {
+          if (loading) {
+            e.preventDefault();
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          if (loading) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Create your Study Set</DialogTitle>
 
@@ -142,7 +156,9 @@ const CreateStudySetDialogue = ({
               >
                 Cancel
               </Button>
-              <Button type="submit">Create</Button>
+              <Button type="submit" disabled={loading}>
+                {!loading ? "Create" : "Creating Set..."}
+              </Button>
             </div>
           </DialogFooter>
         </form>
