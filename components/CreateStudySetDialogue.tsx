@@ -17,6 +17,7 @@ import { useState } from "react";
 interface CreateStudySetDialogueProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedFile: File;
 }
 
 // interface StudySetDialogueProps {
@@ -32,12 +33,47 @@ const INITIAL_STUDYSET_DIALOG = {
 const CreateStudySetDialogue = ({
   open,
   onOpenChange,
+  selectedFile,
 }: CreateStudySetDialogueProps) => {
   const [formData, setFormData] = useState(INITIAL_STUDYSET_DIALOG);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log("submitted!");
+
+    if (
+      !selectedFile ||
+      !formData.name ||
+      !formData.description ||
+      !formData.subjects
+    ) {
+      return;
+    }
+
+    const submittedFormData = new FormData();
+
+    submittedFormData.append("file", selectedFile);
+    submittedFormData.append("name", formData.name);
+    submittedFormData.append("description", formData.description);
+    submittedFormData.append("subjects", formData.subjects);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: submittedFormData,
+      });
+
+      if (!res.ok) {
+        throw new Error("File Parsing Failed");
+      }
+
+      const data = await res.json();
+      console.log(data["response"]["fileText"]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      // set the loading functionality here.
+    }
+
     onOpenChange(false);
   }
 
