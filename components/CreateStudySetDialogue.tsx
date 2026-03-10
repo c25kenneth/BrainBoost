@@ -1,5 +1,6 @@
 "use client";
 
+import { createNote } from "@/app/notes/actions";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -69,11 +70,45 @@ const CreateStudySetDialogue = ({
       }
 
       const data = await res.json();
-      console.log(data["response"]["fileText"]);
+      // console.log(data["response"]["fileText"]);
+
+      if (!data) {
+        throw new Error("No file text found");
+      }
+
+      const geminiRes = await fetch("/api/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ extractedText: data["response"]["fileText"] }),
+      });
+
+      if (!geminiRes.ok) {
+        throw new Error("Error getting response from Gemini");
+      }
+
+      const resultingJSONDoc = await geminiRes.json();
+      console.log(resultingJSONDoc["data"]);
+
+      const result = await createNote({
+        userId: data["response"]["userId"],
+        title: formData.name,
+        sourceType: "pdf",
+        rawText: data["response"]["fileText"],
+        summary: resultingJSONDoc["data"],
+        sourceUrl: `/${selectedFile.name}`,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      console.log("New Note Added!");
     } catch (err) {
       console.error(err);
     } finally {
       // set the loading functionality here.
+      setFormData(INITIAL_STUDYSET_DIALOG);
       setLoading(false);
     }
 
@@ -87,7 +122,6 @@ const CreateStudySetDialogue = ({
           className="mt-5 hover:cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
-            console.log("Hello");
           }}
         >
           Create Study Set

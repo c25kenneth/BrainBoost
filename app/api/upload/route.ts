@@ -37,5 +37,5 @@ export async function POST(request: Request) {
         return NextResponse.json({error: "Error while parsing the file!"}, {status: 500}); 
     }
 
-    return NextResponse.json({response: {message: "File Successfully Parsed!", fileText: extractedText}}, {status: 200});
+    return NextResponse.json({response: {message: "File Successfully Parsed!", fileText: extractedText, userId: session.user.id}}, {status: 200});
 }
