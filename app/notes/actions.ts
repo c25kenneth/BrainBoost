@@ -3,6 +3,7 @@ import { INote } from "@/lib/models/Note";
 import Note from "@/lib/models/Note";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
+import { revalidatePath } from "next/cache";
 // {
 //   "tldr": "Machine Learning is a branch of AI where systems learn from data without explicit programming. It is divided into three main paradigms — supervised, unsupervised, and reinforcement learning — and is evaluated using metrics like accuracy, precision, recall, and F1 score. A key challenge is balancing bias and variance to avoid underfitting or overfitting.",
 //   "keyConcepts": [
@@ -39,6 +40,79 @@ import connectDB from "@/lib/db";
 //   ]
 // }
 
+export async function getFirstThreeNotes(userId: string) {
+    const session = await getSession(); 
+
+    if (!session || userId !== session.user.id) {
+        return {error: "Unauthorized"}
+    }
+
+    await connectDB();
+
+    try {
+        const firstThreeNotes = await Note.find({userId: userId}).sort({"updatedAt": -1}).limit(3);
+    
+        return firstThreeNotes; 
+    } catch (error) {
+        return {error: error}; 
+    }
+
+}
+
+export async function getPaginatedNotes(userId: string, page: number = 1, limit: number = 10) {
+    const session = await getSession();
+
+    if (!session || userId !== session.user.id) {
+        return { error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    try {
+        const skip = (page - 1) * limit;
+        const [notes, total] = await Promise.all([
+            Note.find({ userId }).sort({ updatedAt: -1 }).skip(skip).limit(limit),
+            Note.countDocuments({ userId }),
+        ]);
+
+        return {
+            notes,
+            total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+        };
+    } catch {
+        return { error: "Failed to fetch notes" };
+    }
+}
+
+
+export async function getNoteById(noteId: string) {
+    const session = await getSession();
+
+    if (!session) {
+        return { error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    try {
+        const note = await Note.findById(noteId);
+
+        if (!note) {
+            return { error: "Note not found" };
+        }
+
+        if (note.userId.toString() !== session.user.id) {
+            return { error: "Unauthorized" };
+        }
+
+        return { note };
+    } catch {
+        return { error: "Failed to fetch note" };
+    }
+}
+
 export async function createNote(data: {
     userId: string, 
     title: INote["title"], 
@@ -67,9 +141,51 @@ export async function createNote(data: {
             ...(data.sourceUrl && { sourceUrl: data.sourceUrl }),
         });
 
+        revalidatePath("/dashboard");
         return { success: true, noteId: note._id.toString() };
     } catch (err) {
         console.error("Failed to create note:", err);
         return { error: "Failed to create note" };
+    }
+}
+
+export async function updateNote(
+    noteId: string,
+    updates: Partial<{
+        title: string;
+        summary: Partial<INote["summary"]>;
+    }>
+) {
+    const session = await getSession();
+
+    if (!session) {
+        return { error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    try {
+        const note = await Note.findById(noteId);
+
+        if (!note) return { error: "Note not found" };
+        if (note.userId.toString() !== session.user.id) return { error: "Unauthorized" };
+
+        if (updates.title !== undefined) note.title = updates.title;
+
+        if (updates.summary) {
+            if (updates.summary.tldr !== undefined) note.summary.tldr = updates.summary.tldr;
+            if (updates.summary.keyConcepts !== undefined) note.summary.keyConcepts = updates.summary.keyConcepts;
+            if (updates.summary.formulas !== undefined) note.summary.formulas = updates.summary.formulas;
+            if (updates.summary.examTopics !== undefined) note.summary.examTopics = updates.summary.examTopics;
+        }
+
+        await note.save();
+        revalidatePath(`/notes/${noteId}`);
+        revalidatePath("/notes");
+        revalidatePath("/dashboard");
+
+        return { success: true };
+    } catch {
+        return { error: "Failed to update note" };
     }
 }

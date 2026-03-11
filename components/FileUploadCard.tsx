@@ -54,7 +54,7 @@ const FileUploadCard = () => {
           </div>
           <div>
             <p className="font-semibold">
-              {currFile ? currFile.name : "Upload a document or type"}
+              {currFile ? currFile.name : "Upload a document"}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               BrainBoost will generate a summary, key concepts, and exam-ready

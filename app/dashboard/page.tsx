@@ -1,36 +1,15 @@
-"use client";
-
 import FileUploadCard from "@/components/FileUploadCard";
 import SignOutButton from "@/components/SignOutButton";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Youtube } from "lucide-react";
+import { getFirstThreeNotes } from "../notes/actions";
+import { getSession } from "@/lib/auth/auth";
+import RecentMaterialItem from "@/components/RecentMaterialItem";
+import Link from "next/link";
 
-const recentMaterials = [
-  {
-    id: 1,
-    title: "Calculus II – Integration Techniques",
-    type: "pdf",
-    date: "Mar 3, 2026",
-    concepts: 24,
-  },
-  {
-    id: 2,
-    title: "3Blue1Brown – Linear Algebra Essence",
-    type: "pdf",
-    date: "Mar 2, 2026",
-    concepts: 18,
-  },
-  {
-    id: 3,
-    title: "Organic Chemistry Lecture 7 Slides",
-    type: "pdf",
-    date: "Mar 1, 2026",
-    concepts: 31,
-  },
-];
+export default async function Dashboard() {
+  const session = await getSession();
+  const firstThreeNotes = await getFirstThreeNotes(session!.user.id);
 
-export default function Dashboard() {
   return (
     <div className="flex flex-col bg-background">
       {/* Navbar */}
@@ -50,33 +29,32 @@ export default function Dashboard() {
 
           {/* Recent materials */}
           <Card className="w-full">
-            <CardHeader className="pb-3">
+            <CardHeader className="flex flex-row justify-between">
               <CardTitle className="text-base">Recent Materials</CardTitle>
+              <Link href={"/notes"} className="text-sm text-primary">
+                See More
+              </Link>
             </CardHeader>
             <CardContent className="divide-y divide-border p-0">
-              {recentMaterials.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex cursor-pointer items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                    <FileText className="size-4 text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {m.date} · {m.concepts} concepts
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0 text-xs text-primary"
-                  >
-                    View →
-                  </Button>
-                </div>
-              ))}
+              {"error" in firstThreeNotes ? (
+                <p className="p-4 text-sm text-muted-foreground">
+                  Failed to load notes.
+                </p>
+              ) : firstThreeNotes.length === 0 ? (
+                <p className="p-4 text-sm text-muted-foreground">
+                  No notes yet.
+                </p>
+              ) : (
+                firstThreeNotes.map((note) => (
+                  <RecentMaterialItem
+                    key={note._id.toString()}
+                    id={note._id.toString()}
+                    title={note.title}
+                    date={note.updatedAt.toLocaleDateString()}
+                    concepts={note.summary.keyConcepts.length.toString()}
+                  />
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
